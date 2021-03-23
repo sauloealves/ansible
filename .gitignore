@@ -1,5 +1,5 @@
 .vagrant/
 ansible_chave_privada
-ansible_chave_public.pub
+ansible_chave_privada.pub
 ubuntu-bionic-18.04-cloudimg-console.log
 world.txt

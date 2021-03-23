@@ -41,7 +41,7 @@
         remote_src: yes
       become: yes
 
-    - name: 'alterar a configuracao do wp-config'
+    - name: 'alterar a configuracao do wp-configs'
       replace:
         path: '/var/www/wordpress/wp-config.php'
         regexp: "{{ item.regex }}"
