@@ -1,0 +1,49 @@
+---
+# Baixa da internet.. tem algum bug no meu caso que ele não verifica antes se existe o arquivo e demora muito
+    # como solução coloquei o arquivo já baixado na pasta do vagrant e copio de lá mesmo
+    # - name: 'Baixa o arquivo de instalacao do wordpress'
+    #   get_url: 
+    #     url: 'https://wordpress.org/wordpress-4.9.16.tar.gz'
+    #     dest: '/tmp/wordpress-4.9.16.tar.gz'
+    #     force: no
+
+- name: 'copia o arquivo de instalacao do wordpress'
+  copy:
+    src: '/vagrant/files/wordpress-4.9.16.tar.gz'
+    dest: '/tmp/wordpress-4.9.16.tar.gz'
+    remote_src: yes
+  become: yes
+
+- name: 'Descompactar o arquivo' 
+  unarchive:
+    src: '/tmp/wordpress-4.9.16.tar.gz'
+    dest: /var/www/
+    remote_src: yes
+  become: yes   
+
+- name: 'Copia de arquivo de configuracao do wordpress'
+  copy: 
+    src: "{{ wp_installation_dir }}/wp-config-sample.php"
+    dest: "{{ wp_installation_dir }}/wp-config.php"
+    remote_src: yes
+  become: yes
+
+- name: 'alterar a configuracao do wp-configs'
+  replace:
+    path: "{{ wp_installation_dir }}/wp-config.php"
+    regexp: "{{ item.regex }}"
+    replace: "{{ item.value }}"        
+  with_items:
+    - { regex: 'database_name_here', value: "{{ wp_db_name }}"}
+    - { regex: 'username_here', value: "{{ wp_username }}"}
+    - { regex: 'password_here', value: "{{ wp_user_password }}"}
+    - { regex: 'localhost', value: "{{ wp_db_ip }}"}
+  become: yes
+
+- name: 'Configura apache para servir wordpress'
+  template: 
+    src: 'templates/000-default.conf.j2'
+    dest: '/etc/apache2/sites-available/000-default.conf'
+  become: yes
+  notify:
+      - restart apache 
